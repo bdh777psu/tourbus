@@ -1,0 +1,12 @@
+<table class="table table-condensed tracks">
+    {% for name, track in tracks.items() %}
+        <tr class="track">
+          <td>
+              <div class="track-info">
+                <span class="track-name">{{ name }}</span>
+              </div>
+              <audio src="{{ track }}" preload="auto" />
+        </tr>
+    {% endfor %}
+
+</table>

@@ -1,0 +1,11 @@
+<header id="woz-header">
+  <div class="container">
+    <h1 class="site-title">
+      <a href="{{url_for('homepage')}}">Tourbus</a>
+    </h1>
+    <form action="{{url_for('homepage')}}" method="POST">
+      <input type="text" id="search" name="search" placeholder="Search for artist"> 
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+</header>

@@ -1,0 +1,37 @@
+{% include 'partials/head.html' %}
+
+<section id="woz-content">
+  
+  <div class="container">
+    <table class="top-artists table table-condensed table-striped">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Genre</th>
+          <th>Popularity</th>
+        </tr>
+      </thead>
+      {% for artist in artists %}
+        <tr>
+          <td>
+            {% if artist.images %}
+              <img src="{{artist.images[-1].url}}" alt="{{artist.name}}" class="bobby img-circle">
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('artist', id=artist.id, year=0, city='city') }}">
+              {{ artist.name }}
+            </a>
+          </td>
+          <td>
+            {{ artist.genres | join(', ')}}
+          </td>
+          <td class="number">
+            {{ artist.popularity }}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+</section>
+
