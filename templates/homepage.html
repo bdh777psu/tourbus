@@ -7,7 +7,7 @@
       <thead>
         <tr>
           <th></th>
-          <th>Name</th>
+          <th>Artist</th>
           <th>Genre</th>
           <th>Popularity</th>
         </tr>
@@ -15,23 +15,32 @@
       {% for artist in artists %}
         <tr>
           <td>
-            {% if artist.images %}
-              <img src="{{artist.images[-1].url}}" alt="{{artist.name}}" class="bobby img-circle">
-            {% endif %}
-          </td>
-          <td>
             <a href="{{ url_for('artist', id=artist.id, year=0, city='city') }}">
-              {{ artist.name }}
+              {% if artist.images %}
+                <img src="{{artist.images[0].url}}" alt="{{artist.name}}" class="badge img-circle">
+              {% endif %}
             </a>
           </td>
           <td>
-            {{ artist.genres | join(', ')}}
+            <h3>
+              <a href="{{ url_for('artist', id=artist.id, year=0, city='city') }}">
+                {{ artist.name }}
+              </a>
+            </h3>
+          </td>
+          <td>
+            <h4>
+              {{ artist.genres | join(', ')}}
+            </h4>
           </td>
           <td class="number">
-            {{ artist.popularity }}
+            <h4>
+              {{ artist.popularity }}
+            </h4>
           </td>
         </tr>
       {% endfor %}
     </table>
 </section>
 
+{% include 'partials/foot.html' %}

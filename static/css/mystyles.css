@@ -70,14 +70,12 @@ h1.page-title{
   font-style: italic;
 }
 
+img.badge{
+  width: 150px;
+  height: 150px;
+}
 
 img.bobby{
   width: 90px;
   height: 90px;
 }
-
-
-table.table{
-  vertical-align: middle;
-}
-

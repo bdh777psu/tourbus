@@ -2,10 +2,15 @@
     {% for name, track in tracks.items() %}
         <tr class="track">
           <td>
-              <div class="track-info">
-                <span class="track-name">{{ name }}</span>
-              </div>
-              <audio src="{{ track }}" preload="auto" />
+            <div class="track-info">
+              <span class="track-name">
+                <h4>{{ name }}</h4>
+              </span>
+              <a href="{{ track.external_urls.spotify }}" target="_blank">
+                <img src="/static/images/listenon.png" alt="Listen on Spotify" width="200" align="right">
+              </a>  
+              <audio src="{{ track.preview_url }}" preload="auto"></audio>
+            </div>
         </tr>
     {% endfor %}
 

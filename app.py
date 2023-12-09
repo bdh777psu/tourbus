@@ -1,4 +1,5 @@
 import os
+from google.cloud import secretmanager
 from flask import Flask, render_template, session, request, redirect 
 from flask_session import Session   
 import spotipy
@@ -6,18 +7,16 @@ from spotipy.oauth2 import SpotifyOAuth
 from setlipy import client
 from flask_googlemaps import GoogleMaps
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(64)
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
 Session(app)
 
-sp = spotipy.Spotify()
-
-sfm = client.Setlipy(auth='')
-
-GoogleMaps(app, key='')
-
+maps = ''
+sfm = ''
+sp = ''
 
 tour_name = ''
 city_name = ''
@@ -31,12 +30,12 @@ def signin():
     """
 
     cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
-    auth_manager = SpotifyOAuth(client_id='', 
-                                                   client_secret='',
-                                                   redirect_uri='http://127.0.0.1:8888',
-                                                   cache_handler=cache_handler,
-                                                   show_dialog=True,
-                                                   scope='user-top-read')
+    auth_manager = SpotifyOAuth(client_id=access_secret_version('spotify_clientid'),
+                                client_secret=access_secret_version('spotify_secret'),
+                                redirect_uri='http://127.0.0.1:5000',
+                                cache_handler=cache_handler,
+                                show_dialog=True,
+                                scope='user-top-read')
 
     if request.args.get("code"):
         # Step 2. Being redirected from Spotify auth page
@@ -47,7 +46,10 @@ def signin():
     if not auth_manager.validate_token(cache_handler.get_cached_token()):
         # Step 1. Display sign in link when no token
         auth_url = auth_manager.get_authorize_url()
-        return f'<h1><a href="{auth_url}">Sign in</a></h1>'
+        return f'<center><h1><img src="/static/images/tourbus.png" alt="A tourbus" width="400"><br>\
+                    <a href="{auth_url}">\
+                        <img src="/static/images/loginbutton.png" alt="A tourbus" width="300">\
+                    </a></h1></center>'
 
 
 @app.route('/home', methods=["GET", "POST"])
@@ -234,7 +236,7 @@ def get_tracks(artist_name, setlists):
                 song_name = song['name']
                 songs = sp.search(q=f'{song_name}%20artist:{artist_name}', limit=1)
                 
-                tracks[song_name] = songs['tracks']['items'][0]['preview_url']
+                tracks[song_name] = songs['tracks']['items'][0]
 
         return tracks
     except KeyError:
@@ -274,5 +276,35 @@ def pageNotFound(error):
     return render_template('error.html')
 
 
+def access_secret_version(secret_id, version_id="latest"):
+    """
+    Accesses a secret version from the Secret Manager.
+
+    :param secret_id: The ID of the secret.
+    :type secret_id: str
+    :param version_id: The ID of the version to access (default is "latest").
+    :type version_id: str
+    :return: The decoded payload of the secret version.
+    :rtype: str
+    """
+        
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Build the resource name of the secret version.
+    name = f"projects/tourbus-407014/secrets/{secret_id}/versions/{version_id}"
+
+    # Access the secret version.
+    response = client.access_secret_version(name=name)
+
+    # Return the decoded payload.
+    return response.payload.data.decode('UTF-8')
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+
+
+maps = GoogleMaps(app, key=access_secret_version('google_maps'))
+sfm = client.Setlipy(auth=access_secret_version('setlistfm'))
+sp = spotipy.Spotify()
