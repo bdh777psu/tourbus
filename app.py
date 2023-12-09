@@ -32,7 +32,7 @@ def signin():
     cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
     auth_manager = SpotifyOAuth(client_id=access_secret_version('spotify_clientid'),
                                 client_secret=access_secret_version('spotify_secret'),
-                                redirect_uri='https://tourbus-c26hyhllla-uc.a.run.app:80',
+                                redirect_uri='http://tourbus-c26hyhllla-uc.a.run.app:80',
                                 cache_handler=cache_handler,
                                 show_dialog=True,
                                 scope='user-top-read')
