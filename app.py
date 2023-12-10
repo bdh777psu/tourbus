@@ -45,11 +45,15 @@ def signin():
 
     if not auth_manager.validate_token(cache_handler.get_cached_token()):
         # Step 1. Display sign in link when no token
-        auth_url = auth_manager.get_authorize_url()
+        auth_url = auth_manager.get_authorize_url()  
         return f'<center><h1><img src="/static/images/tourbus.png" alt="A tourbus" width="400"><br>\
                     <a href="{auth_url}">\
                         <img src="/static/images/loginbutton.png" alt="A tourbus" width="300">\
                     </a></h1></center>'
+    else:
+        # Step 3. Signed in, display data
+        sp = spotipy.Spotify(auth_manager=auth_manager)
+        return redirect('/home')
 
 
 @app.route('/home', methods=["GET", "POST"])
