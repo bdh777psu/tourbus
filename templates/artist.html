@@ -14,11 +14,11 @@
                 <img src="{{image_url}}" alt="{{image_url}}" class="img-fluid img-square">
             </section>
             <section class="sec">
+              {{googlemap("tour_map", lat=0.23234234, lng=-0.234234234, markers=markers, fit_markers_to_bounds=True)}}<br>
               <form action="{{url_for('artist', id=artist.id, year=0, city=city)}}" method="POST">
                 <input type="text" id="year" name="year" placeholder="Tour year"> 
                 <input type="submit" value="Search">
               </form>
-              {{googlemap("tour_map", lat=0.23234234, lng=-0.234234234, markers=markers, fit_markers_to_bounds=True)}}
             </section>
             <section class="sec">
                 <h4>Related artists</h4>

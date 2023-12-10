@@ -14,9 +14,8 @@ app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './.flask_session/'
 Session(app)
 
-maps = ''
 sfm = ''
-sp = ''
+sp = spotipy.Spotify()
 
 tour_name = ''
 city_name = ''
@@ -40,7 +39,9 @@ def signin():
     if request.args.get("code"):
         # Step 2. Being redirected from Spotify auth page
         auth_manager.get_access_token(request.args.get("code"))
-        sp.auth_manager = auth_manager
+        
+        global sp
+        sp = spotipy.Spotify(auth_manager=auth_manager)
         return redirect('/home')
 
     if not auth_manager.validate_token(cache_handler.get_cached_token()):
@@ -162,7 +163,7 @@ def get_sfm_setlists(artist_name, year, city):
         json_dump = (sfmdata.json())
         return json_dump['setlist']
     except KeyError:
-        print(f"No data found for {city_name}!")
+        print(f"No data found for {year}!")
 
 
 def get_map_markers(id, setlists):
@@ -200,7 +201,7 @@ def get_map_markers(id, setlists):
 
         return markers
     except TypeError:
-        print(f"No setlist found for {city_name}!")
+        print(f"No markers set for {city_name}!")
 
 def get_tracks(artist_name, setlists):
     """
@@ -217,35 +218,46 @@ def get_tracks(artist_name, setlists):
         KeyError: If the tour name or set(s) are not found for a specific city.
 
     """
+    
+    global tour_name
+    global city_name
+    global event_date
+    global venue_name
 
     tour_stop = ''
-
-    for setlist in setlists:
-        if setlist['eventDate'] == event_date:
-            tour_stop = setlist
-            break
-    
     try:
-        global tour_name
+        for setlist in setlists:
+            if setlist['eventDate'] == event_date:
+                tour_stop = setlist
+                break
+    except:
+        print(f"Setlist not found for {city_name}!")
+    
+    tour_name = ''
+    try:
         tour_name = tour_stop['tour']['name'] + " - "
     except KeyError:
-        tour_name = ''
         print(f"Tour name not found for {city_name}!")
-
+    except TypeError:
+        tour_name = ''
+    
+    tracks = {}
     try:
-        tracks = {}
-
         for set in tour_stop['sets']['set']:
             for song in set['song']:
                 song_name = song['name']
                 songs = sp.search(q=f'{song_name}%20artist:{artist_name}', limit=1)
                 
                 tracks[song_name] = songs['tracks']['items'][0]
-
         return tracks
-    except KeyError:
-        print(f"Set(s) not found for {city_name}!")
+    except:
+        tour_name = "Sorry, no tour for the selected year"
+        city_name = ''
+        event_date = ''
+        venue_name = 'any venues'
 
+        tracks['Fail'] = {'preview_url': '', 'external_urls': {'spotify':'https://open.spotify.com/track/5sluzb7VfBh5sBM8C8Nofa'}}
+        return tracks
 
 @app.route('/sign_out')
 def sign_out():
@@ -311,4 +323,3 @@ if __name__ == '__main__':
 
 maps = GoogleMaps(app, key=access_secret_version('google_maps'))
 sfm = client.Setlipy(auth=access_secret_version('setlistfm'))
-sp = spotipy.Spotify()
